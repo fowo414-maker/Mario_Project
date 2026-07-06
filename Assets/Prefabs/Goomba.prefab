@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 512353075425925621}
   - component: {fileID: 4363584382195829782}
   - component: {fileID: 4481105849901017285}
+  - component: {fileID: 1670163834244232059}
   m_Layer: 6
   m_Name: Goomba
   m_TagString: Enemy
@@ -186,3 +187,16 @@ MonoBehaviour:
   stompedSprite: {fileID: -8049014845997942409, guid: a7d83ff2ba15bba4899d0a210342a41a, type: 3}
   animationInterval: 0.3
   stompedDuration: 0.2
+--- !u!114 &1670163834244232059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 64600093348309206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e20070f588854247bb1d15359ba6765, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoombaActivator
+  activatemargin: 1.5
