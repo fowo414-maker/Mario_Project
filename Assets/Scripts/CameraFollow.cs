@@ -3,7 +3,8 @@ using UnityEngine;
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
-    public float minX = 0f;
+    public float minX = 8f;
+    public float maxX = 200f;
 
     private float fixedY;
     private float fixedZ;
@@ -22,7 +23,7 @@ public class CameraFollow : MonoBehaviour
 
     private void LateUpdate()
     {
-        transform.position = new Vector3(Mathf.Max(target.position.x, minX), fixedY, fixedZ);
+        transform.position = new Vector3(Mathf.Clamp(target.position.x, minX, maxX), fixedY, fixedZ);
 
     }
 }
