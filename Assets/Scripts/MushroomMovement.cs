@@ -4,6 +4,7 @@ public class MushroomMovement : MonoBehaviour
 {
     public float moveSpeed = 2f;
 
+
     private Rigidbody2D rb;
     private int direction = 1;
     // Start is called once before the first execution of Update after the MonoBehaviour is created

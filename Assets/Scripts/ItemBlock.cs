@@ -5,8 +5,10 @@ public class ItemBlock : MonoBehaviour
     public GameObject mushroomPrefabs;
     public Transform spawnPoint;
 
-    public Color unusedColor = Color.yellow;
-    public Color usedColor = Color.white;
+    public Sprite unusedSprite;
+    public Sprite usedSprite;
+
+    public bool containsMushroom;
 
     private SpriteRenderer spriteRenderer;
     private bool used = false;
@@ -14,7 +16,11 @@ public class ItemBlock : MonoBehaviour
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.color = unusedColor;
+
+        if (unusedSprite != null)
+        {
+            spriteRenderer.sprite = unusedSprite;
+        }
     }
 
     // Update is called once per frame
@@ -37,11 +43,15 @@ public class ItemBlock : MonoBehaviour
 
         foreach(ContactPoint2D contact in collision.contacts)
         {
-            if (contact.normal.y > 0.5f)
+            if (contact.normal.y == 1f)
             {
-                SpawnMushroom();
+                if (containsMushroom)
+                {
+                    SpawnMushroom();
+                }
+                
                 used = true;
-                spriteRenderer.color = usedColor;
+                spriteRenderer.sprite = usedSprite;
                 break;
             }
         }

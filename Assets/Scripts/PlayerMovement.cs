@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpPower = 8f;
     public float fallLimit = -8f;
+    public float fallMultiplier = 2.2f;
 
     private Rigidbody2D rb;
     private bool isGrounded = false;
@@ -51,6 +52,11 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.linearVelocity = Vector2.zero;
             return;
+        }
+
+        if (rb.linearVelocity.y < 0)
+        {
+            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime;
         }
 
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
@@ -109,7 +115,16 @@ public class PlayerMovement : MonoBehaviour
         {
             if (contact.normal.y > 0.5f)
             {
-                Destroy(collision.gameObject);
+                GoombaMovement goomba = collision.gameObject.GetComponent<GoombaMovement>();
+
+                if (goomba != null)
+                {
+                    goomba.Stomp();
+                }
+                else
+                {
+                    Destroy(collision.gameObject);
+                }
 
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpPower * 0.6f);
 
