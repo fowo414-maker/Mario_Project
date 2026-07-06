@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 3974898954095227244}
   - component: {fileID: 8244196392058622955}
   - component: {fileID: 2668866983139691581}
+  - component: {fileID: -152061683058007590}
+  - component: {fileID: 2189544573528340379}
   m_Layer: 0
   m_Name: Block
   m_TagString: Ground
@@ -129,3 +131,29 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1, y: 1}
   m_Direction: 0
+--- !u!114 &-152061683058007590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2383656184829563885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02c59e596043adb439ea722a9d9adcb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BrickBlock
+--- !u!114 &2189544573528340379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2383656184829563885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7100eb93d8d7034dbeea2de1c852ab4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlockBump
+  bumpHeight: 0.2
+  bumpSpeed: 8

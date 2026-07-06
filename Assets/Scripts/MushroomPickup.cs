@@ -9,6 +9,12 @@ public class MushroomPickup : MonoBehaviour
         {
             return;
         }
+        PlayerMovement player = collision.GetComponent<PlayerMovement>();
+
+        if (player != null)
+        {
+            player.Grow();
+        }
 
         Destroy(transform.parent.gameObject);
     }

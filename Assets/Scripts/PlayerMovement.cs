@@ -14,7 +14,12 @@ public class PlayerMovement : MonoBehaviour
     public float jumpPower = 8f;
     public float fallLimit = -8f;
     public float fallMultiplier = 2.2f;
+    public bool isBig = false;
+    public Sprite smalltype;
+    public Sprite bigtype;
 
+    private BoxCollider2D bc;
+    private SpriteRenderer spriteRenderer;
     private Rigidbody2D rb;
     private bool isGrounded = false;
     private float moveInput;
@@ -25,8 +30,15 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        bc = GetComponent<BoxCollider2D>();
         rb = GetComponent<Rigidbody2D>();
         startPosition = transform.position;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (smalltype != null)
+        {
+            spriteRenderer.sprite = smalltype;
+        }
+        bc.size = new Vector2(1, 1);
     }
 
     // Update is called once per frame
@@ -68,12 +80,15 @@ public class PlayerMovement : MonoBehaviour
         }
 
     }
+
+    //충돌했을 때
     void OnCollisionEnter2D(Collision2D collision)
     {
         CheckGroundCollision(collision);
         CheckEnemyCollision(collision);
     }
 
+    //충돌에서 벗어났을 때
     void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -82,11 +97,13 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    //충돌 중일 때
     private void OnCollisionStay2D(Collision2D collision)
     {
         CheckGroundCollision(collision);
     }
 
+    //물체와 충돌했을 때
     void CheckGroundCollision(Collision2D collision)
     {
         if (!collision.gameObject.CompareTag("Ground"))
@@ -103,7 +120,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    //적과 부딪혔을 때
+    //적과 충돌했을 때
     void CheckEnemyCollision(Collision2D collision)
     {
         if (!collision.gameObject.CompareTag("Enemy"))
@@ -113,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
 
         foreach(ContactPoint2D contact in collision.contacts)
         {
-            if (contact.normal.y > 0.5f)
+            if (contact.normal.y > 0.4f)
             {
                 GoombaMovement goomba = collision.gameObject.GetComponent<GoombaMovement>();
 
@@ -131,12 +148,20 @@ public class PlayerMovement : MonoBehaviour
                 return;
             }
         }
-
-        Die();
+        if (isBig)
+        {
+            isBig = false;
+            spriteRenderer.sprite = smalltype;
+            bc.size = new Vector2(1, 1);
+        }
+        else
+        {
+            Die();
+        }
     }
 
   
-
+    //트리거에 들어갔을 때
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Goal"))
@@ -145,6 +170,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    //스테이지 클리어 시
     void ClearStage()
     {
         isCleard = true;
@@ -154,6 +180,7 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log("Stage Clear!");
     }
 
+    //죽었을 시
     void Die()
     {
         if (isDead || isCleard)
@@ -177,6 +204,20 @@ public class PlayerMovement : MonoBehaviour
         gameoverText.SetActive(false);
         isDead = false;
     }
+
+    public void Grow()
+    {
+        if (isBig)
+        {
+            return;
+        }
+
+        isBig = true;
+        spriteRenderer.sprite = bigtype;
+        bc.size = new Vector2(1, 2);
+    }
+
+    //리스폰
     void Respawn()
     {
         transform.position = startPosition;

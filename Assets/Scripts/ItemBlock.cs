@@ -10,13 +10,14 @@ public class ItemBlock : MonoBehaviour
 
     public bool containsMushroom;
 
+    private BlockBump blockBump;
     private SpriteRenderer spriteRenderer;
     private bool used = false;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-
+        blockBump = GetComponent<BlockBump>();
         if (unusedSprite != null)
         {
             spriteRenderer.sprite = unusedSprite;
@@ -43,8 +44,12 @@ public class ItemBlock : MonoBehaviour
 
         foreach(ContactPoint2D contact in collision.contacts)
         {
-            if (contact.normal.y == 1f)
+            if (contact.normal.y >= 0.9f)
             {
+                if (blockBump != null)
+                {
+                    blockBump.Bump();
+                }
                 if (containsMushroom)
                 {
                     SpawnMushroom();
