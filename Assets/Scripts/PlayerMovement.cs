@@ -18,7 +18,25 @@ public class PlayerMovement : MonoBehaviour
     public bool isBig = false;
     public Sprite smalltype;
     public Sprite bigtype;
+    public Sprite idleRightSmallSprite;
+    public Sprite idleLeftSmallSprite;
+    public Sprite jumpRightSmallSprite;
+    public Sprite jumpLeftSmallSprite;
+    public Sprite idleRightBigSprite;
+    public Sprite idleLeftBigSprite;
+    public Sprite jumpRightBigSprite;
+    public Sprite jumpLeftBigSprite;
+    public Sprite dieSprite;
+    public Sprite[] walkRightSmallSprites;
+    public Sprite[] walkLeftSmallSprites;
+    public Sprite[] walkRightBigSprites;
+    public Sprite[] walkLeftBigSprites;
 
+    public float baseAnimationInterval = 0.15f;
+
+    private int currentWalkIndex = 0;
+    private float animationTimer = 0f;
+    private int facingDirection = 1;
     private BoxCollider2D bc;
     private SpriteRenderer spriteRenderer;
     private Rigidbody2D rb;
@@ -46,7 +64,14 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         moveInput = Input.GetAxisRaw("Horizontal");
-
+        if (moveInput >= 0f)
+        {
+            facingDirection = 1;
+        }
+        else
+        {
+            facingDirection = -1;
+        }
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
@@ -56,6 +81,11 @@ public class PlayerMovement : MonoBehaviour
         if (transform.position.y < fallLimit)
         {
             Die();
+        }
+
+        if (!isDead)
+        {
+            UpdateMarioAnimation();
         }
     }
 
@@ -73,7 +103,6 @@ public class PlayerMovement : MonoBehaviour
         }
 
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
-
         if (jumpRequested)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpPower);
@@ -191,6 +220,7 @@ public class PlayerMovement : MonoBehaviour
 
         isDead = true;
         rb.linearVelocity = Vector2.zero;
+        spriteRenderer.sprite = dieSprite;
         gameoverText.SetActive(true);
         Time.timeScale = 0f;
         StartCoroutine(RespawnAfterDelay());
@@ -203,6 +233,7 @@ public class PlayerMovement : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    //버섯먹고 성장
     public void Grow()
     {
         if (isBig)
@@ -213,6 +244,118 @@ public class PlayerMovement : MonoBehaviour
         isBig = true;
         spriteRenderer.sprite = bigtype;
         bc.size = new Vector2(1, 2);
+    }
+
+    //마리오 애니메이션 업데이트
+    void UpdateMarioAnimation()
+    {
+        if (!isGrounded)
+        {
+            if (facingDirection == 1)
+            {
+                if (isBig)
+                {
+                    spriteRenderer.sprite = jumpRightBigSprite;
+                }
+                else
+                {
+                    spriteRenderer.sprite = jumpRightSmallSprite;
+                }
+            }
+            else
+            {
+                if (isBig)
+                {
+                    spriteRenderer.sprite = jumpLeftBigSprite;
+                }
+                else
+                {
+                    spriteRenderer.sprite = jumpLeftSmallSprite;
+                }
+            }
+            return;
+        }
+
+        float speed = Mathf.Abs(rb.linearVelocity.x);
+
+        if (speed < 0.1f)
+        {
+            if (facingDirection == 1)
+            {
+                if (isBig)
+                {
+                    spriteRenderer.sprite = idleRightBigSprite;
+                }
+                else
+                {
+                    spriteRenderer.sprite = idleRightSmallSprite;
+                }
+            }
+            else
+            {
+                if (isBig)
+                {
+                    spriteRenderer.sprite = idleLeftBigSprite;
+                }
+                else
+                {
+                    spriteRenderer.sprite = idleLeftSmallSprite;
+                }
+            }
+            return;
+        }
+
+        AnimateWalk(speed);
+    }
+
+    void AnimateWalk(float speed)
+    {
+        Sprite[] currentWalkSprites;
+
+        if (facingDirection == 1)
+        {
+            if (isBig)
+            {
+                currentWalkSprites = walkRightBigSprites;
+            }
+            else
+            {
+                currentWalkSprites = walkRightSmallSprites;
+            }
+        }
+        else
+        {
+            if (isBig)
+            {
+                currentWalkSprites = walkLeftBigSprites;
+            }
+            else
+            {
+                currentWalkSprites = walkLeftSmallSprites;
+            }
+        }
+
+        if (currentWalkSprites == null || currentWalkSprites.Length == 0)
+        {
+            return;
+        }
+
+        float interval = baseAnimationInterval / Mathf.Max(speed / 4f, 1f);
+
+        animationTimer += Time.deltaTime;
+
+        if (animationTimer >= interval)
+        {
+            animationTimer = 0;
+            currentWalkIndex++;
+
+            if (currentWalkIndex >= currentWalkSprites.Length)
+            {
+                currentWalkIndex = 0;
+            }
+
+            spriteRenderer.sprite = currentWalkSprites[currentWalkIndex];
+        }
     }
 
 }
