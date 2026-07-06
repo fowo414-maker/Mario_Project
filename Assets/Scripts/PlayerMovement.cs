@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
     private float moveInput;
     private bool jumpRequested = false;
     private Vector3 startPosition;
+    private bool isCleard = false;
 
     void Start()
     {
@@ -40,6 +41,12 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (isCleard)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
 
         if (jumpRequested)
@@ -53,7 +60,6 @@ public class PlayerMovement : MonoBehaviour
     {
         CheckGroundCollision(collision);
         CheckEnemyCollision(collision);
-        CheckMushroomCollision(collision);
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -107,16 +113,23 @@ public class PlayerMovement : MonoBehaviour
         Respawn();
     }
 
-    void CheckMushroomCollision (Collision2D collision)
-    {
-        if (!collision.gameObject.CompareTag("Mushroom"))
-        {
-            return;
-        }
+  
 
-        Destroy(collision.gameObject);
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Goal"))
+        {
+            ClearStage();
+        }
     }
 
+    void ClearStage()
+    {
+        isCleard = true;
+        rb.linearVelocity = Vector2.zero;
+
+        Debug.Log("Stage Clear!");
+    }
     void Respawn()
     {
         transform.position = startPosition;
