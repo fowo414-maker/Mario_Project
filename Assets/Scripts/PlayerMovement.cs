@@ -44,7 +44,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (jumpRequested)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocityX, jumpPower);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpPower);
             jumpRequested = false;
         }
 
@@ -52,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
     void OnCollisionEnter2D(Collision2D collision)
     {
         CheckGroundCollision(collision);
+        CheckEnemyCollision(collision);
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -81,6 +82,28 @@ public class PlayerMovement : MonoBehaviour
                 return;
             }
         }
+    }
+
+    void CheckEnemyCollision(Collision2D collision)
+    {
+        if (!collision.gameObject.CompareTag("Enemy"))
+        {
+            return;
+        }
+
+        foreach(ContactPoint2D contact in collision.contacts)
+        {
+            if (contact.normal.y > 0.5f)
+            {
+                Destroy(collision.gameObject);
+
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpPower * 0.6f);
+
+                return;
+            }
+        }
+
+        Respawn();
     }
 
     void Respawn()
