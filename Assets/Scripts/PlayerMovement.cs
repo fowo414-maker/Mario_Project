@@ -3,6 +3,7 @@ using UnityEditor.ShaderGraph.Internal;
 using TMPro;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -191,18 +192,15 @@ public class PlayerMovement : MonoBehaviour
         isDead = true;
         rb.linearVelocity = Vector2.zero;
         gameoverText.SetActive(true);
-
+        Time.timeScale = 0f;
         StartCoroutine(RespawnAfterDelay());
     }
 
     IEnumerator RespawnAfterDelay()
     {
-        yield return new WaitForSeconds(respawnDelay);
-
-        Respawn();
-
-        gameoverText.SetActive(false);
-        isDead = false;
+        yield return new WaitForSecondsRealtime(respawnDelay);
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void Grow()
@@ -215,15 +213,6 @@ public class PlayerMovement : MonoBehaviour
         isBig = true;
         spriteRenderer.sprite = bigtype;
         bc.size = new Vector2(1, 2);
-    }
-
-    //리스폰
-    void Respawn()
-    {
-        transform.position = startPosition;
-        rb.linearVelocity = Vector2.zero;
-        isGrounded = false;
-        jumpRequested = false;
     }
 
 }
