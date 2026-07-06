@@ -53,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
     {
         CheckGroundCollision(collision);
         CheckEnemyCollision(collision);
+        CheckMushroomCollision(collision);
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -104,6 +105,16 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Respawn();
+    }
+
+    void CheckMushroomCollision (Collision2D collision)
+    {
+        if (!collision.gameObject.CompareTag("Mushroom"))
+        {
+            return;
+        }
+
+        Destroy(collision.gameObject);
     }
 
     void Respawn()
