@@ -27,10 +27,22 @@ public class PlayerMovement : MonoBehaviour
     public Sprite jumpRightBigSprite;
     public Sprite jumpLeftBigSprite;
     public Sprite dieSprite;
+    public Sprite GoalSmallSprite;
+    public Sprite GoalBigSprite;
+    public Sprite GoalBottomLeftSmallSprite;
+    public Sprite GoalBottomLeftBigSprite;
+    public Sprite GoalBottomRightSmallSprite;
+    public Sprite GoalBottomRightBigSprite;
     public Sprite[] walkRightSmallSprites;
     public Sprite[] walkLeftSmallSprites;
     public Sprite[] walkRightBigSprites;
     public Sprite[] walkLeftBigSprites;
+    public Transform goalBottomPoint;
+    public float goalPauseTime = 0.5f;
+    public float poleSlideSpeed = 2f;
+    public float clearWalkSpeed = 2f;
+    public float clearwalkDuration = 2f;
+    public float clearwalkAnimationInterval = 0.15f;
 
     public float baseAnimationInterval = 0.15f;
 
@@ -46,6 +58,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 startPosition;
     private bool isCleard = false;
     private bool isDead = false;
+    private int clearWalkIndex = 0;
+    private float clearwalkAnimationTimer = 0f;
 
     void Start()
     {
@@ -63,15 +77,13 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isDead || isCleard)
+        {
+            return;
+        }
+
         moveInput = Input.GetAxisRaw("Horizontal");
-        if (moveInput >= 0f)
-        {
-            facingDirection = 1;
-        }
-        else
-        {
-            facingDirection = -1;
-        }
+        
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
@@ -83,7 +95,9 @@ public class PlayerMovement : MonoBehaviour
             Die();
         }
 
-        if (!isDead)
+        
+
+        if (!isDead && !isCleard)
         {
             UpdateMarioAnimation();
         }
@@ -91,9 +105,14 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isCleard || isDead)
+        if (isDead)
         {
             rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
+        if (isCleard)
+        {
             return;
         }
 
@@ -103,6 +122,14 @@ public class PlayerMovement : MonoBehaviour
         }
 
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+        if (rb.linearVelocity.x >= 0f)
+        {
+            facingDirection = 1;
+        }
+        else
+        {
+            facingDirection = -1;
+        }
         if (jumpRequested)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpPower);
@@ -203,11 +230,98 @@ public class PlayerMovement : MonoBehaviour
     //스테이지 클리어 시
     void ClearStage()
     {
+        if (isCleard || isDead)
+        {
+            return;
+        }
         isCleard = true;
         rb.linearVelocity = Vector2.zero;
-        clearText.SetActive(true);
-
+        Time.timeScale = 0f;
+        if (isBig)
+        {
+            spriteRenderer.sprite = GoalBigSprite;
+        }
+        else
+        {
+            spriteRenderer.sprite = GoalSmallSprite;
+        }
+        StartCoroutine(GoalSequence());
         Debug.Log("Stage Clear!");
+    }
+
+    IEnumerator GoalSequence()
+    {
+        float plusHeight;
+        if (isBig)
+        {
+            plusHeight = 0.5f;
+        }
+        else
+        {
+            plusHeight = 0;
+        }
+        rb.linearVelocity = Vector2.zero;
+        Vector2 slideTarget = new Vector2(transform.position.x, goalBottomPoint.position.y + 1f + plusHeight);
+
+        yield return new WaitForSecondsRealtime(goalPauseTime);
+
+        if (goalBottomPoint != null)
+        {
+            while(Vector2.Distance(transform.position, slideTarget) > 0.05f)
+            {
+                transform.position = Vector2.MoveTowards(transform.position, slideTarget, poleSlideSpeed * Time.unscaledDeltaTime);
+
+                rb.linearVelocity = Vector2.zero;
+
+                yield return null;
+            }
+            transform.position = slideTarget;
+            if (isBig)
+            {
+                spriteRenderer.sprite = GoalBottomLeftBigSprite;
+            }
+            else
+            {
+                spriteRenderer.sprite = GoalBottomLeftSmallSprite;
+            }
+
+            yield return new WaitForSecondsRealtime(goalPauseTime);
+            transform.position = new Vector3(transform.position.x + 0.6f, transform.position.y, transform.position.z);
+            if (isBig)
+            {
+                spriteRenderer.sprite = GoalBottomRightBigSprite;
+            }
+            else
+            {
+                spriteRenderer.sprite = GoalBottomRightSmallSprite;
+            }
+            yield return new WaitForSecondsRealtime(goalPauseTime);
+        }
+        
+
+        //성으로 걸어가기
+        float timer = 0f;
+
+        transform.position = new Vector3(goalBottomPoint.position.x + 1f, goalBottomPoint.position.y + plusHeight, goalBottomPoint.position.z);
+        clearWalkIndex = 0;
+        clearwalkAnimationTimer = 0f;
+
+        while (timer < clearwalkDuration)
+        {
+            transform.position += Vector3.right * clearWalkSpeed * Time.unscaledDeltaTime;
+
+            UpdateClearWalkAnimation();
+
+            timer += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        rb.linearVelocity = Vector2.zero;
+
+        if (clearText != null)
+        {
+            clearText.SetActive(true);
+        }
     }
 
     //죽었을 시
@@ -355,6 +469,38 @@ public class PlayerMovement : MonoBehaviour
             }
 
             spriteRenderer.sprite = currentWalkSprites[currentWalkIndex];
+        }
+    }
+
+    void UpdateClearWalkAnimation()
+    {
+        Sprite[] currentWalkSprites;
+
+        if (isBig)
+        {
+            currentWalkSprites = walkRightBigSprites;
+        }
+        else
+        {
+            currentWalkSprites = walkRightSmallSprites;
+        }
+
+        if (currentWalkSprites == null || currentWalkSprites.Length == 0)
+        {
+            return;
+        }
+
+        clearwalkAnimationTimer += Time.unscaledDeltaTime;
+
+        if (clearwalkAnimationTimer >= clearwalkAnimationInterval)
+        {
+            clearwalkAnimationTimer = 0f;
+            clearWalkIndex++;
+            if(clearWalkIndex >= currentWalkSprites.Length)
+            {
+                clearWalkIndex = 0;
+            }
+            spriteRenderer.sprite = currentWalkSprites[clearWalkIndex];
         }
     }
 
