@@ -37,12 +37,16 @@ public class PlayerMovement : MonoBehaviour
     public Sprite[] walkLeftSmallSprites;
     public Sprite[] walkRightBigSprites;
     public Sprite[] walkLeftBigSprites;
+    public Sprite[] growFlashLeftSprites;
+    public Sprite[] growFlashRightSprites;
     public Transform goalBottomPoint;
     public float goalPauseTime = 0.5f;
     public float poleSlideSpeed = 2f;
     public float clearWalkSpeed = 2f;
     public float clearwalkDuration = 2f;
     public float clearwalkAnimationInterval = 0.15f;
+    public float growFlashInterval = 0.1f;
+    public int growFlashCount = 9;
 
     public float baseAnimationInterval = 0.15f;
 
@@ -58,8 +62,10 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 startPosition;
     private bool isCleard = false;
     private bool isDead = false;
+    private bool isGrowing = false;
     private int clearWalkIndex = 0;
     private float clearwalkAnimationTimer = 0f;
+    private Sprite[] GrowSprites;
 
     void Start()
     {
@@ -77,7 +83,7 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isDead || isCleard)
+        if (isDead || isCleard || isGrowing)
         {
             return;
         }
@@ -105,7 +111,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isDead)
+        if (isDead || isGrowing)
         {
             rb.linearVelocity = Vector2.zero;
             return;
@@ -187,7 +193,7 @@ public class PlayerMovement : MonoBehaviour
 
         foreach(ContactPoint2D contact in collision.contacts)
         {
-            if (contact.normal.y > 0.4f)
+            if (contact.normal.y > 0.3f)
             {
                 GoombaMovement goomba = collision.gameObject.GetComponent<GoombaMovement>();
 
@@ -354,10 +360,40 @@ public class PlayerMovement : MonoBehaviour
         {
             return;
         }
+        
+        if (facingDirection == 1)
+        {
+            GrowSprites = growFlashRightSprites;
+        }
+        else
+        {
+            GrowSprites = growFlashLeftSprites;
+        }
+        StartCoroutine(GrowSequence());
+    }
 
+    IEnumerator GrowSequence()
+    {
+        isGrowing = true;
+
+        rb.linearVelocity = Vector2.zero;
+
+        float originalTimeScale = Time.timeScale;
+        float currentY = transform.position.y;
+        Time.timeScale = 0f;
+        for (int i = 0; i < growFlashCount; i++)
+        {
+            spriteRenderer.sprite = GrowSprites[i%3];
+            transform.position = new Vector3(transform.position.x, currentY + (0.25f * (i%3)), transform.position.z);
+            yield return new WaitForSecondsRealtime(growFlashInterval);
+        }
         isBig = true;
-        spriteRenderer.sprite = bigtype;
+        spriteRenderer.sprite = GrowSprites[2];
         bc.size = new Vector2(1, 2);
+
+        Time.timeScale = originalTimeScale;
+
+        isGrowing = false;
     }
 
     //마리오 애니메이션 업데이트
