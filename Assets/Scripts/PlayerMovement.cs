@@ -1,10 +1,12 @@
 using Unity.VisualScripting;
 using UnityEditor.ShaderGraph.Internal;
+using TMPro;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public GameObject clearText;
     public float moveSpeed = 5f;
     public float jumpPower = 8f;
     public float fallLimit = -8f;
@@ -127,6 +129,7 @@ public class PlayerMovement : MonoBehaviour
     {
         isCleard = true;
         rb.linearVelocity = Vector2.zero;
+        clearText.SetActive(true);
 
         Debug.Log("Stage Clear!");
     }
