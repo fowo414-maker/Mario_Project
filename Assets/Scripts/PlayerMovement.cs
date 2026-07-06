@@ -47,10 +47,7 @@ public class PlayerMovement : MonoBehaviour
     }
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
+        CheckGroundCollision(collision);
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -58,6 +55,27 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
+        }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        CheckGroundCollision(collision);
+    }
+
+    void CheckGroundCollision(Collision2D collision)
+    {
+        if (!collision.gameObject.CompareTag("Ground"))
+        {
+            return;
+        }
+        foreach(ContactPoint2D contact in collision.contacts)
+        {
+            if (contact.normal.y > 0.5f)
+            {
+                isGrounded = true;
+                return;
+            }
         }
     }
 
