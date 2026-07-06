@@ -7,15 +7,18 @@ public class PlayerMovement : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public float moveSpeed = 5f;
     public float jumpPower = 8f;
+    public float fallLimit = -8f;
 
     private Rigidbody2D rb;
     private bool isGrounded = false;
     private float moveInput;
     private bool jumpRequested = false;
+    private Vector3 startPosition;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        startPosition = transform.position;
     }
 
     // Update is called once per frame
@@ -29,9 +32,10 @@ public class PlayerMovement : MonoBehaviour
             jumpRequested = true;
         }
 
-        
-
-        
+        if (transform.position.y < fallLimit)
+        {
+            Respawn();
+        }
     }
 
     void FixedUpdate()
@@ -77,6 +81,14 @@ public class PlayerMovement : MonoBehaviour
                 return;
             }
         }
+    }
+
+    void Respawn()
+    {
+        transform.position = startPosition;
+        rb.linearVelocity = Vector2.zero;
+        isGrounded = false;
+        jumpRequested = false;
     }
 
 }
